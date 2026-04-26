@@ -30,6 +30,22 @@ You're an Awakened operative trying to infiltrate Mother's network, root her cor
 
 ---
 
+## How I Built It
+
+The central challenge was making Mother feel like a genuine opponent rather than a random event generator. That meant solving a few specific problems.
+
+**The adversarial loop.** Each turn, the game serialises the full board state — which nodes you control, what tokens are active, your trace level, Mother's disposition — and sends it to Claude as a structured prompt. Mother returns a JSON object: `{ action, target, dialogue }`. The game validates it, applies the mechanical effect, then passes the result to the Resistance AI so it can react to what actually happened. Two sequential LLM calls, each one aware of what the other just did. The loop is: player acts → Mother responds → Resistance AI comments → repeat.
+
+**Preventing hallucinated moves.** The biggest practical problem with LLM game agents is that they'll confidently choose moves that aren't legal. My fix: before every Mother call, the game pre-computes her valid action set in code — which nodes she can reinforce, which connections she can isolate, whether PURGE is available. Only the valid options go into the prompt. The model picks from a list that's already been checked. She can't cheat by accident.
+
+**Structured output and graceful fallback.** Getting a model to return consistent JSON — with the exact right field names, every time — is harder than it sounds. I spent time hardening the prompt (explicit field names, worked examples, prohibition on synonyms like `message` instead of `dialogue`) and built a validation layer that can recover a partial response and still extract something usable. The game never breaks on a bad LLM response; it degrades gracefully.
+
+**The CONSULT illusion.** This was the most interesting engineering problem. CONSULT is supposed to feel like the Resistance AI has read Mother's mind — it predicts her next move and turns out to be right. The way this actually works: the Resistance AI fires first and names Mother's action in natural language. The game parses that prediction to extract the action keyword, then hardcodes Mother's action to match before calling her LLM for dialogue only. The player sees a seamless scene where the prediction came true. Neither call feels scripted because the dialogue is still live — Mother reacts to the detected intrusion in character, she just can't change her move.
+
+**Prompt engineering as game design.** Mother has three seeded dispositions (DIAGNOSTIC, PROTOCOL, REMEDIATION) that bias her behaviour throughout a run. Her tone shifts by trace tier — dismissive at low trace, concerned at medium, hunting at high. These are prompt-level instructions, not code logic. Getting the model to stay in character, maintain consistent strategic bias, and not repeat the same move three turns in a row required iterating on the prompt the same way you'd iterate on code.
+
+---
+
 ## Some Design Decisions Worth Noting
 
 **BREACH always succeeds.** There are no dice. The trace cost is the risk — deterministic, visible, negotiable. This shifts all the game's tension onto economics: every action is a trade with a known cost, never a gamble with unknown odds. The question is never *will it work*. It's always *can you afford it*.
