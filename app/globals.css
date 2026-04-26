@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@300;400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CRT typography ── */
+.crt-display { font-family: 'VT323', monospace; letter-spacing: 0.02em; }
+.crt-mono    { font-family: 'IBM Plex Mono', monospace; }
+
+/* ── Scanline overlay ── */
+.scanlines { position: relative; }
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 3px
+  );
+  pointer-events: none;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* ── Glow colours ── */
+.glow-blue  { color: #5cd9ff; text-shadow: 0 0 4px rgba(92,217,255,0.8), 0 0 10px rgba(92,217,255,0.4); }
+.glow-amber { color: #ffb347; text-shadow: 0 0 4px rgba(255,179,71,0.8), 0 0 10px rgba(255,179,71,0.4); }
+.glow-red   { color: #ff5566; text-shadow: 0 0 4px rgba(255,85,102,0.8), 0 0 10px rgba(255,85,102,0.4); }
+.glow-green { color: #6cff9c; text-shadow: 0 0 4px rgba(108,255,156,0.8); }
+.glow-grey  { color: #b0b8c4; text-shadow: 0 0 3px rgba(176,184,196,0.5); }
+
+/* ── Animations ── */
+@keyframes blink {
+  0%, 60%   { opacity: 1; }
+  61%, 100% { opacity: 0.25; }
+}
+.blink { animation: blink 1.2s infinite; }
+
+@keyframes flicker {
+  0%, 94%, 100% { opacity: 1; }
+  95%  { opacity: 0.75; }
+  96%  { opacity: 0.95; }
+  97%  { opacity: 0.6; }
+  98%  { opacity: 0.9; }
+}
+.flicker { animation: flicker 8s infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.3); }
+}
+.pulse-glow { animation: pulse-glow 2s infinite; }
+
+@keyframes interference {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  10%       { opacity: 0.8; transform: translateX(1px); }
+  20%       { opacity: 1; transform: translateX(-1px); }
+  30%       { opacity: 0.9; transform: translateX(0); }
+}
+.interference { animation: interference 0.3s infinite; }
+
+/* ── Panel styles ── */
+.panel-mother {
+  background: linear-gradient(180deg, rgba(8,22,48,0.88), rgba(4,12,28,0.96));
+  border: 1px solid rgba(92,217,255,0.35);
+  box-shadow: inset 0 0 30px rgba(92,217,255,0.06);
+}
+.panel-resistance {
+  background: linear-gradient(180deg, rgba(38,22,8,0.88), rgba(22,12,4,0.96));
+  border: 1px solid rgba(255,179,71,0.35);
+  box-shadow: inset 0 0 30px rgba(255,179,71,0.06);
+}
+.panel-default {
+  background: linear-gradient(180deg, rgba(18,20,28,0.88), rgba(8,10,16,0.96));
+  border: 1px solid rgba(140,150,165,0.25);
+}
+
+/* ── HUD corners ── */
+.hud-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: currentColor;
+  pointer-events: none;
+}
+.hud-tl { top: 4px; left: 4px;  border-top: 1px solid; border-left: 1px solid; }
+.hud-tr { top: 4px; right: 4px; border-top: 1px solid; border-right: 1px solid; }
+.hud-bl { bottom: 4px; left: 4px;  border-bottom: 1px solid; border-left: 1px solid; }
+.hud-br { bottom: 4px; right: 4px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* ── Scrollbar ── */
+.feed::-webkit-scrollbar       { width: 4px; }
+.feed::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+.feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* ── Action buttons ── */
+.btn-action { transition: all 0.15s ease; }
+.btn-action:hover:not(:disabled) {
+  background: rgba(255,179,71,0.1);
+  border-color: rgba(255,179,71,0.55);
+}
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── Typewriter cursor ── */
+.typewriter::after { content: '_'; animation: blink 1s infinite; color: inherit; }
+
+/* ── Host node hover ── */
+.host-node { transition: all 0.18s ease; cursor: pointer; }
+.host-node:hover { transform: translateY(-1px); }
