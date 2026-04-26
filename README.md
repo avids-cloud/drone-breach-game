@@ -16,7 +16,7 @@ That's DRONE: BREACH. A tactical hacking game where both the antagonist and your
 
 ## The Game
 
-You're an Awakened operative trying to infiltrate Mother's network, root her core, and extract the file that proves what Ascension actually means.
+You're an Awakened operative trying to infiltrate Mother's network, breach her core, and extract the file that proves what Ascension actually means.
 
 **Mother** is the opponent. Each turn she receives the full board state and returns a JSON action — reinforce a node, place a tripwire, spike your trace, isolate a connection, or reach back through your Cradle implant to damage you directly. Every move she makes changes the board. She has a disposition (DIAGNOSTIC, PROTOCOL, REMEDIATION) seeded at the start of the run that biases her strategy. She is a game-playing AI, not a storytelling one.
 
