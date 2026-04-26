@@ -1,0 +1,238 @@
+/* ── DRONE: BREACH — Updated globals.css ──────────────────────────────
+ * Redesigned by Claude Design (April 2026)
+ * Changes from original:
+ *   - New color palette: worn industrial amber-gold, steel blue, olive green
+ *   - Replaced IBM Plex Mono with Space Mono (heavier, more worn feel)
+ *   - Added persistent grit layers: grain, global scanlines, phosphor burn
+ *   - New glitch animation system with slice artifacts and RGB split
+ *   - Updated panel classes with glow/shadow treatments
+ *   - DialoguePanel asymmetry: Mother dominant (60%), Resistance degraded (40%)
+ * ──────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Color tokens ─────────────────────────────────────────────────── */
+:root {
+  --color-bg:           #070608;
+  --color-panel:        rgba(14,13,16,0.97);
+  --color-panel-mother: rgba(6,12,24,0.97);
+  --color-panel-resist: rgba(12,14,9,0.97);
+
+  --color-primary:      #c8b040;   /* amber-gold — main chrome */
+  --color-dim:          #756a42;   /* secondary labels, descriptions */
+  --color-mother:       #3ab8d8;   /* Mother — steel blue */
+  --color-resistance:   #92b822;   /* Resistance — dirty olive */
+  --color-success:      #50a868;   /* root access, wins */
+  --color-danger:       #e03018;   /* trace lock, damage */
+
+  --border-default:     rgba(140,128,75,0.35);
+  --border-mother:      rgba(40,148,210,0.45);
+  --border-resistance:  rgba(106,138,28,0.45);
+}
+
+/* ── CRT typography ── */
+.crt-display { font-family: 'VT323', monospace; letter-spacing: 0.02em; }
+.crt-mono    { font-family: 'Space Mono', monospace; }
+
+/* ── Per-panel scanline overlay (unchanged from original) ── */
+.scanlines { position: relative; }
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 3px
+  );
+  pointer-events: none;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* ── Glow colours — updated palette ── */
+.glow-blue   { color: var(--color-mother);     text-shadow: 0 0 4px rgba(58,184,216,0.8),  0 0 10px rgba(58,184,216,0.4); }
+.glow-amber  { color: var(--color-primary);    text-shadow: 0 0 4px rgba(200,176,64,0.8),  0 0 10px rgba(200,176,64,0.4); }
+.glow-green  { color: var(--color-resistance); text-shadow: 0 0 4px rgba(146,184,34,0.8); }
+.glow-red    { color: var(--color-danger);     text-shadow: 0 0 4px rgba(224,48,24,0.8),   0 0 10px rgba(224,48,24,0.4); }
+.glow-grey   { color: var(--color-dim);        text-shadow: 0 0 3px rgba(117,106,66,0.5); }
+.glow-success{ color: var(--color-success);    text-shadow: 0 0 4px rgba(80,168,104,0.8); }
+
+/* ── Core animations (unchanged) ── */
+@keyframes blink {
+  0%, 60%   { opacity: 1; }
+  61%, 100% { opacity: 0.25; }
+}
+.blink { animation: blink 1.2s infinite; }
+
+@keyframes flicker {
+  0%, 94%, 100% { opacity: 1; }
+  95%  { opacity: 0.75; }
+  96%  { opacity: 0.95; }
+  97%  { opacity: 0.6; }
+  98%  { opacity: 0.9; }
+}
+.flicker { animation: flicker 8s infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.3); }
+}
+.pulse-glow { animation: pulse-glow 2s infinite; }
+
+@keyframes interference {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  10%      { opacity: 0.8; transform: translateX(1px); }
+  20%      { opacity: 1; transform: translateX(-1px); }
+  30%      { opacity: 0.9; transform: translateX(0); }
+}
+.interference { animation: interference 0.3s infinite; }
+
+/* ── NEW: Glitch animations ── */
+@keyframes glitch-main {
+  0%, 100% { transform: none; filter: none; }
+  5%       { transform: translateX(-5px) skewX(-2deg); filter: brightness(1.15) contrast(1.05); }
+  10%      { transform: translateX(6px) skewX(1deg); }
+  15%      { transform: translateX(-2px) skewX(0.5deg); filter: none; }
+  20%      { transform: translateX(4px); }
+  25%      { transform: none; }
+}
+
+@keyframes glitch-slice-1 {
+  0%, 100% { clip-path: inset(0 0 100% 0); opacity: 0; }
+  5%       { clip-path: inset(6% 0 88% 0);  opacity: 1; transform: translateX(10px); }
+  10%      { clip-path: inset(38% 0 52% 0); transform: translateX(-7px); }
+  15%      { clip-path: inset(65% 0 24% 0); transform: translateX(4px); }
+  20%      { clip-path: inset(82% 0 8% 0);  transform: translateX(-9px); }
+  25%      { clip-path: inset(0 0 100% 0);  opacity: 0; }
+}
+
+@keyframes glitch-slice-2 {
+  0%, 100% { clip-path: inset(0 0 100% 0); opacity: 0; }
+  8%       { clip-path: inset(22% 0 68% 0); opacity: 1; transform: translateX(-12px); }
+  13%      { clip-path: inset(50% 0 38% 0); transform: translateX(8px); }
+  18%      { clip-path: inset(74% 0 15% 0); transform: translateX(-5px); }
+  23%      { clip-path: inset(0 0 100% 0);  opacity: 0; }
+}
+
+@keyframes noise-flash {
+  0%, 100% { opacity: 0; }
+  5%, 15%  { opacity: 0.07; }
+  10%, 20% { opacity: 0.12; }
+}
+
+@keyframes rgb-split {
+  0%, 100% { text-shadow: 0 0 16px rgba(200,176,64,0.5); }
+  5%       { text-shadow:  4px 0 rgba(58,184,216,0.85),  -4px 0 rgba(146,184,34,0.85); }
+  10%      { text-shadow: -3px 0 rgba(58,184,216,0.6),    3px 0 rgba(146,184,34,0.6); }
+  15%      { text-shadow:  5px 0 rgba(58,184,216,0.9),   -5px 0 rgba(146,184,34,0.9); }
+  20%      { text-shadow: 0 0 16px rgba(200,176,64,0.5); }
+}
+
+@keyframes line-drop {
+  0%, 100% { opacity: 0; top: 0%; }
+  10%      { opacity: 1; top: 18%; height: 1px; }
+  30%      { opacity: 0.6; top: 43%; height: 2px; }
+  60%      { opacity: 1; top: 71%; height: 1px; }
+  80%      { opacity: 0; }
+}
+
+@keyframes burn-drift {
+  0%   { opacity: 0.022; transform: translateY(0); }
+  50%  { opacity: 0.035; transform: translateY(1px); }
+  100% { opacity: 0.022; transform: translateY(0); }
+}
+
+/* Glitch trigger classes — apply to root wrapper on interval */
+.glitching      { animation: glitch-main   0.5s steps(1) forwards !important; }
+.glitch-rgb     { animation: rgb-split      0.5s steps(1) forwards; }
+.glitch-slice-1 { animation: glitch-slice-1 0.5s steps(1) forwards; }
+.glitch-slice-2 { animation: glitch-slice-2 0.5s steps(1) forwards; }
+.line-drop      { animation: line-drop      0.5s steps(1) forwards; }
+
+/* ── NEW: Global grit layers — add these as fixed overlays in layout ── */
+
+/*
+  Add the following divs as children of your root layout wrapper,
+  inside a <div className="grit-layers"> container with:
+    position: absolute; inset: 0; pointer-events: none; z-index: 10;
+
+  1. Grain texture:
+     background-image: url("data:image/svg+xml,...fractalNoise...");
+     opacity: 0.038; mix-blend-mode: overlay;
+
+  2. Global scanlines:
+     background: repeating-linear-gradient(
+       0deg, transparent 0px, transparent 2px,
+       rgba(0,0,0,0.16) 2px, rgba(0,0,0,0.16) 3px
+     );
+
+  3. Phosphor burn bands (burn-drift animation):
+     background: linear-gradient(180deg, transparent 0%,
+       rgba(200,176,64,0.018) 22%, transparent 26%,
+       rgba(58,184,216,0.012) 51%, transparent 55%,
+       rgba(200,176,64,0.014) 78%, transparent 82%
+     );
+
+  4. Vignette:
+     background: radial-gradient(ellipse at center,
+       transparent 65%, rgba(0,0,0,0.32) 100%
+     );
+
+  See DialoguePanel.tsx and page.tsx for implementation details.
+*/
+
+/* ── Panel styles — updated ── */
+.panel-mother {
+  background: var(--color-panel-mother);
+  border: 1px solid var(--border-mother);
+  box-shadow: inset 0 0 40px rgba(58,184,216,0.05), 0 0 12px rgba(58,184,216,0.08);
+}
+.panel-resistance {
+  background: var(--color-panel-resist);
+  border: 1px dashed var(--border-resistance); /* dashed = degraded channel */
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+}
+.panel-default {
+  background: var(--color-panel);
+  border: 1px solid var(--border-default);
+}
+
+/* ── HUD corners (unchanged) ── */
+.hud-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: currentColor;
+  pointer-events: none;
+}
+.hud-tl { top: 4px;    left: 4px;  border-top: 1px solid;    border-left: 1px solid; }
+.hud-tr { top: 4px;    right: 4px; border-top: 1px solid;    border-right: 1px solid; }
+.hud-bl { bottom: 4px; left: 4px;  border-bottom: 1px solid; border-left: 1px solid; }
+.hud-br { bottom: 4px; right: 4px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* ── Scrollbar ── */
+.feed::-webkit-scrollbar       { width: 4px; }
+.feed::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+.feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* ── Action buttons — updated hover color ── */
+.btn-action { transition: all 0.15s ease; }
+.btn-action:hover:not(:disabled) {
+  background: rgba(146,184,34,0.1);
+  border-color: rgba(146,184,34,0.55);
+}
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── Typewriter cursor ── */
+.typewriter::after { content: '_'; animation: blink 1s infinite; color: inherit; }
+
+/* ── Host node hover ── */
+.host-node { transition: all 0.18s ease; cursor: pointer; }
+.host-node:hover { transform: translateY(-1px); }

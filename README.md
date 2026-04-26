@@ -79,8 +79,55 @@ Open [http://localhost:3000](http://localhost:3000). Each turn makes API calls t
 
 ---
 
+## Visual Design — Claude Design
+
+The visual identity of DRONE: BREACH was developed using **[Claude Design](https://claude.ai)** as a collaborative design tool. After the game mechanics and initial UI were built in code, I used Claude Design to run a structured visual exploration — treating it like a design session with a senior art director.
+
+### The Process
+
+Starting from the existing codebase, Claude Design read every component, the full type system, the CSS, and the game logic before proposing anything. The exploration produced three distinct visual directions, each fully interactive with simulated AI responses so the aesthetic could be evaluated in the context of actual gameplay — not just as static mockups.
+
+### Three Directions Explored
+
+**NOSTROMO** — The chosen direction. Worn industrial palette: amber-gold chrome, steel blue for Mother, dirty olive for the Resistance. Persistent film grain, global CRT scanlines, phosphor burn bands, and a glitch system that fires every 3–10 seconds with horizontal slice artifacts and RGB channel separation on the title. The aesthetic goal was "a PC from today, running for 100 years" — degraded, functional, no decoration that isn't earned.
+
+![NOSTROMO theme](assets/design/nostromo.png)
+*NOSTROMO: worn industrial amber, steel blue Mother, olive Resistance. Grit effects always on.*
+
+**WEYLAND** — Corporate bureaucratic horror. Deep navy grid, electric cyan, SVG node graph with crosshair nodes instead of a text list. Mother as cold institutional architecture. Named for the obvious reference.
+
+![WEYLAND theme](assets/design/weyland.png)
+*WEYLAND: corporate grid, node graph network map, electric cyan Mother.*
+
+**NULL** — Near-monochrome minimal. Mother's panel is inverted — light background, dark text — so she literally owns the interface. Resistance barely registers. Red only appears at danger thresholds.
+
+![NULL theme](assets/design/null.png)
+*NULL: near-monochrome, Mother inverts the display. Resistance is a footnote.*
+
+### Key Design Decisions
+
+**Mother vs Resistance asymmetry.** The original design gave both dialogue panels equal height and visual weight. Claude Design pushed for Mother to be dominant: she gets 60% of the right column, a stronger border glow, HUD corner markers, a separator line, and larger text. The Resistance panel gets a dashed border (unstable channel), dimmer text, a "LINK ε-7 · DEGRADED" header, and no HUD chrome. The asymmetry is mechanical — it tells you something about the power dynamic before a single line of dialogue loads.
+
+**Readability vs atmosphere.** Several iterations were needed to find the right balance between grit effects and readable text. The final values: grain at 3.8% overlay opacity, scanlines at 16%, vignette fading from 65% inward to 32% at edges. Secondary text (`--color-dim: #756a42`) was lifted significantly from the original near-invisible values.
+
+**No neon.** The original palette used bright cyan and amber. The redesign desaturated everything — the goal was phosphor that's been on too long, not a nightclub. Nothing is at full saturation.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `app/globals.css` | New color tokens, grit animations (glitch, grain, phosphor burn), updated panel classes |
+| `components/DialoguePanel.tsx` | Mother dominant treatment, Resistance degraded treatment, asymmetric headers |
+| `app/page.tsx` | Glitch state + interval, grit overlay divs, `grid-rows-[3fr_2fr]` for dialogue column |
+
+Updated files are in the [`export/`](export/) directory of this repository.
+
+---
+
 ## Credits
 
 World design and lore: [`docs/drone-world-brief.md`](docs/drone-world-brief.md). Game design influenced by *Into the Breach* (visible enemy intent) and *Inscryption* (the feeling that the game's intelligence is watching you). The Resistance AI's voice is K-2SO. Mother's voice is every polite system that's ever told you it's for your own good.
+
+Visual design exploration: [Claude Design](https://claude.ai). References: Alien/Nostromo interfaces, Blade Runner, Cyberpunk 2077.
 
 Full design documentation in [`docs/DESIGN.md`](docs/DESIGN.md).
