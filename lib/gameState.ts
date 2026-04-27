@@ -57,7 +57,6 @@ export function buildInitialState(): GameState {
       { t: 0, kind: 'info', msg: `session opened · resistance handshake complete · disposition: ${dispositionName}` },
     ],
     dialogue: [],
-    busy: false,
   };
 }
 
@@ -277,7 +276,7 @@ export function applyMotherAction(
   let s = addDialogue(state, { speaker: 'MOTHER', text: dialogue });
 
   const hostById = (numId: number): HostId | undefined =>
-    (Object.values(state.hosts) as Host[]).find(h => h.numericId === numId)?.id;
+    (Object.values(s.hosts) as Host[]).find(h => h.numericId === numId)?.id;
 
   switch (action) {
     case 'REINFORCE': {

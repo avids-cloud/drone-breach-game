@@ -120,5 +120,4 @@ export interface GameState {
   status: GameStatus;
   events: EventEntry[];
   dialogue: DialogueLine[];
-  busy: boolean; // LLM calls in flight
 }

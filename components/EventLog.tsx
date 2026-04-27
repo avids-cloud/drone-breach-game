@@ -23,9 +23,9 @@ export default function EventLog({ events }: Props) {
       <div className="text-[10px] uppercase tracking-widest glow-grey mb-1.5">// console</div>
 
       <div ref={ref} className="feed flex-1 overflow-y-auto space-y-0.5 pr-1" style={{ minHeight: 0 }}>
-        {events.map((e, i) => (
+        {events.map((e) => (
           <div
-            key={i}
+            key={e.t}
             className={`crt-mono text-[10px] leading-relaxed ${
               e.kind === 'success' ? 'glow-green' :
               e.kind === 'fail'    ? 'glow-red'   :

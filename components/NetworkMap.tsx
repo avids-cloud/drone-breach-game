@@ -17,9 +17,9 @@ function ConnectionLine({
   return (
     <div className={`flex items-center gap-1 crt-mono text-[9px] my-0.5 ${isolated ? 'opacity-25 line-through' : 'opacity-50'}`}
       style={{ color: isolated ? '#ff5566' : '#4a5568' }}>
-      <span>{fromId.replace('_', '-')}</span>
+      <span>{fromId.replaceAll('_', '-')}</span>
       <span>→</span>
-      <span>{toId.replace('_', '-')}</span>
+      <span>{toId.replaceAll('_', '-')}</span>
       {isolated && <span className="glow-red ml-1">[ISOLATED]</span>}
     </div>
   );

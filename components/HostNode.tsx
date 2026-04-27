@@ -59,9 +59,9 @@ export default function HostNode({ host, isSelected, onClick, tokens }: Props) {
   const stateColor = STATE_COLOR[host.state] ?? '#b0b8c4';
 
   return (
-    <div
+    <button
       onClick={onClick}
-      className={`host-node relative p-2.5 crt-mono text-xs scanlines select-none ${isSelected ? 'panel-resistance' : 'panel-default'}`}
+      className={`host-node relative p-2.5 crt-mono text-xs scanlines select-none w-full text-left ${isSelected ? 'panel-resistance' : 'panel-default'}`}
       style={{
         borderColor: isSelected ? '#ffb347' : stateColor,
         boxShadow: isSelected ? '0 0 10px rgba(255,179,71,0.35)' : `0 0 5px ${stateColor}30`,
@@ -94,6 +94,6 @@ export default function HostNode({ host, isSelected, onClick, tokens }: Props) {
       {host.hasDb && (
         <div className="glow-red text-[9px] mt-0.5 blink">[ subjects.db ]</div>
       )}
-    </div>
+    </button>
   );
 }
