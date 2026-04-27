@@ -1,7 +1,7 @@
-import type { Host, HostId, Connection, Disposition, DispositionName } from './types';
+import type { Host, HostId, Connection, Disposition, DispositionName, CVEStrength } from './types';
 
 // ── CVE trace costs ──────────────────────────────────────────────────
-export const CVE_BREACH_COST: Record<string, number> = {
+export const CVE_BREACH_COST: Record<CVEStrength, number> = {
   soft: 10,
   medium: 20,
   hard: 35,

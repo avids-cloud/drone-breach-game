@@ -71,7 +71,7 @@ export function formatAvailableActions(available: AvailableMotherAction[]): stri
 export function validateMotherResponse(
   raw: string,
   available: AvailableMotherAction[],
-  tier: string,
+  tier: 'low' | 'medium' | 'high',
 ): MotherResponse {
   let parsed: Partial<MotherResponse>;
 
@@ -122,7 +122,7 @@ export function validateMotherResponse(
 function fallbackResponse(
   preferredAction: MotherActionType | null,
   available: AvailableMotherAction[],
-  tier: string,
+  tier: 'low' | 'medium' | 'high',
 ): MotherResponse {
   if (available.length === 0) {
     return {

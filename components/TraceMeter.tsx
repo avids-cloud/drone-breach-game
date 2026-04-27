@@ -1,5 +1,5 @@
 'use client';
-import { traceTierLabel } from '@/lib/gameState';
+import { traceTier, traceTierLabel } from '@/lib/gameState';
 
 interface Props {
   trace: number;
@@ -7,7 +7,7 @@ interface Props {
 
 export default function TraceMeter({ trace }: Props) {
   const pct = Math.min(100, trace);
-  const tier = trace < 30 ? 'low' : trace < 60 ? 'medium' : 'high';
+  const tier = traceTier(trace);
   const color = tier === 'low' ? '#6cff9c' : tier === 'medium' ? '#ffb347' : '#ff5566';
   const label = traceTierLabel(trace);
 
