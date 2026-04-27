@@ -16,7 +16,7 @@ That's DRONE: BREACH. A tactical hacking game where both the antagonist and your
 
 ## The Game
 
-You're an Awakened operative trying to infiltrate Mother's network, breach her core, and extract the file that proves what Ascension actually means.
+You're an Awakened operative trying to infiltrate Mother's network, breach her core, and extract the file on Ascension — a selection process no one outside Mother's network has ever seen.
 
 **Mother** is the opponent. Each turn she receives the full board state and returns a JSON action — reinforce a node, place a tripwire, spike your trace, isolate a connection, or reach back through your Cradle implant to damage you directly. Every move she makes changes the board. She has a disposition (DIAGNOSTIC, PROTOCOL, REMEDIATION) seeded at the start of the run that biases her strategy. She is a game-playing AI, not a storytelling one.
 
@@ -55,7 +55,7 @@ The central challenge was making Mother feel like a genuine opponent rather than
 **Nine guaranteed-distinct run configurations.** Three dispositions × three possible key locations, all seeded deterministically by code before the LLM ever fires. The AI shapes the continuation; the opening board state is always testable and reproducible.
 
 ![EXFIL win screen](assets/screenshot-03.png)
-*WIN: subjects.db extracted. 47,212 citizens selected for neural dissolution. The "elevation" was consumption.*
+*WIN: subjects.db extracted. 47,212 citizens selected for Ascension. The file does not say what that means.*
 
 ![Trace lock loss screen](assets/screenshot-04.png)
 *LOSE: trace hits 100. Custodians inbound. The Resistance AI burns the channel.*

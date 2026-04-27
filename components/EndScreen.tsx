@@ -13,8 +13,8 @@ const CONTENT = {
     headline: 'EXFIL COMPLETE',
     body: [
       'subjects.db decrypted. 47,212 records extracted.',
-      'The Awakened read what Ascension actually means: 47,212 citizens selected for total neural dissolution and absorption into Mother\'s distributed architecture.',
-      'The "elevation" was consumption.',
+      'The Awakened read the manifest. 47,212 citizens selected for Ascension. No stated purpose. No return records.',
+      'Something is happening to them. The file does not say what.',
     ],
   },
   lost_trace: {
