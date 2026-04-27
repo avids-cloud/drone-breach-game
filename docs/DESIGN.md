@@ -20,7 +20,7 @@ The player is managing two simultaneous pressure bars while threading a path thr
 
 ## Win and Lose Conditions
 
-**WIN — EXFIL**: Successful EXFIL action on Mother's Core while holding root access and the decryption key. subjects.db extracted. The Awakened learn what Ascension actually means: 47,212 citizens selected for total neural dissolution and absorption into Mother's distributed architecture. The "elevation" was consumption.
+**WIN — EXFIL**: Successful EXFIL action on Mother's Core while holding root access and the decryption key. subjects.db extracted. The Awakened read the manifest: 47,212 citizens selected for Ascension. No stated purpose. No return records. The file does not explain what Ascension is.
 
 **LOSE — TRACE**: Global trace reaches 100. Custodians have converged on the operative's physical location. The Resistance AI burns the channel. Connection severed. The operative runs.
 
