@@ -2,6 +2,7 @@
 import { Eye, Zap, Radio, Download, BookOpen } from 'lucide-react';
 import type { Host, GameState, PlayerActionType } from '@/lib/types';
 import { CVE_BREACH_COST } from '@/lib/constants';
+import { canPerformAction } from '@/lib/gameState';
 
 interface ActionDef {
   key: PlayerActionType;
@@ -9,8 +10,6 @@ interface ActionDef {
   icon: React.ElementType;
   traceCost: (host: Host | null, gs: GameState) => string;
   desc: string;
-  isValid: (host: Host | null, gs: GameState) => boolean;
-  requires: string;
 }
 
 const ACTIONS: ActionDef[] = [
@@ -20,8 +19,6 @@ const ACTIONS: ActionDef[] = [
     icon: Eye,
     traceCost: () => '+5',
     desc: 'Reveals services and CVE tier. Transition: visible → scanned.',
-    isValid: (h) => h !== null && h.state === 'visible',
-    requires: 'Visible host',
   },
   {
     key: 'BREACH',
@@ -34,8 +31,6 @@ const ACTIONS: ActionDef[] = [
       return shielded ? `+${base + 15} ·SHD` : `+${base}`;
     },
     desc: 'Gain / deepen access. Always succeeds. Trace cost is the risk.',
-    isValid: (h) => h !== null && (h.state === 'scanned' || h.state === 'user'),
-    requires: 'Scanned or user-shell host',
   },
   {
     key: 'SPOOF',
@@ -43,11 +38,6 @@ const ACTIONS: ActionDef[] = [
     icon: Radio,
     traceCost: () => '-10',
     desc: 'Plant false trail. Reduces trace by 10. Once per run per host.',
-    isValid: (h, gs) => {
-      if (!h || (h.state !== 'user' && h.state !== 'root')) return false;
-      return !gs.tokens.some(t => t.type === 'SPOOF_TRAIL' && t.hostId === h.id);
-    },
-    requires: 'Accessed host (user/root), not yet spoofed',
   },
   {
     key: 'EXFIL',
@@ -55,9 +45,6 @@ const ACTIONS: ActionDef[] = [
     icon: Download,
     traceCost: () => '+30',
     desc: 'Extract subjects.db. Ends the run. WIN.',
-    isValid: (h, gs) =>
-      h !== null && h.id === 'mother_core' && h.state === 'root' && gs.keyAcquired,
-    requires: 'Root on Mother\'s Core + decryption key',
   },
   {
     key: 'CONSULT',
@@ -65,8 +52,6 @@ const ACTIONS: ActionDef[] = [
     icon: BookOpen,
     traceCost: () => '+10',
     desc: 'One per run. Resistance AI reads Mother\'s next move from deep buffer.',
-    isValid: (_h, gs) => !gs.consultUsed,
-    requires: 'CONSULT available (once per run)',
   },
 ];
 
@@ -90,8 +75,8 @@ export default function ActionPanel({ selectedHost, gameState, onAction, busy }:
       <div className="text-[10px] uppercase tracking-widest glow-grey mb-2">Operator Actions</div>
 
       <div className="space-y-1">
-        {ACTIONS.map(({ key, label, icon: Icon, traceCost, desc, isValid, requires }) => {
-          const valid = isValid(selectedHost, gameState);
+        {ACTIONS.map(({ key, label, icon: Icon, traceCost, desc }) => {
+          const valid = canPerformAction(gameState, selectedHost, key);
           const disabled = !valid || busy || !isPlaying;
           const cost = traceCost(selectedHost, gameState);
           const isNegative = cost.startsWith('-');

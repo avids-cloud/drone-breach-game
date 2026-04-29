@@ -1,6 +1,7 @@
 'use client';
 import { Shield, Server, Database, Lock, Wifi, Activity, Skull } from 'lucide-react';
 import type { Host, Token } from '@/lib/types';
+import { HOST_IDS } from '@/lib/constants';
 
 interface Props {
   host: Host;
@@ -18,10 +19,10 @@ const STATE_COLOR: Record<string, string> = {
 };
 
 function HostIcon({ id }: { id: string }) {
-  if (id === 'mother_core')       return <Skull size={13} />;
-  if (id === 'memory_vault')      return <Database size={13} />;
-  if (id === 'optimisation')      return <Activity size={13} />;
-  if (id === 'custodian_dispatch') return <Shield size={13} />;
+  if (id === HOST_IDS.MOTHER_CORE)        return <Skull size={13} />;
+  if (id === HOST_IDS.MEMORY_VAULT)       return <Database size={13} />;
+  if (id === HOST_IDS.OPTIMISATION)       return <Activity size={13} />;
+  if (id === HOST_IDS.CUSTODIAN_DISPATCH) return <Shield size={13} />;
   return <Wifi size={13} />;
 }
 

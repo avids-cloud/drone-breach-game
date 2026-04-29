@@ -1,5 +1,5 @@
 import type { GameState, AvailableMotherAction, MotherActionType, MotherResponse, Host } from './types';
-import { CONNECTIONS, CORE_CONNECTION_IDS, FALLBACK_MOTHER_DIALOGUE } from './constants';
+import { CONNECTIONS, CORE_CONNECTION_IDS, FALLBACK_MOTHER_DIALOGUE, HOST_IDS } from './constants';
 import { traceTier } from './gameState';
 
 // ── Available actions computation ─────────────────────────────────────
@@ -15,7 +15,7 @@ export function computeMotherAvailableActions(state: GameState): AvailableMother
   const reinforceTargets = allHosts
     .filter(h =>
       h.state !== 'hidden' &&
-      h.id !== 'mother_core' &&
+      h.id !== HOST_IDS.MOTHER_CORE &&
       !tokens.some(t => t.type === 'SHIELD' && t.hostId === h.id)
     )
     .map(h => h.numericId);
