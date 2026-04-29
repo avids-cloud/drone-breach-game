@@ -5,7 +5,7 @@ import {
   buildInitialState,
   applyScan, applyBreach, applySpoof, applyExfil, applyConsult,
   applyMotherAction, applyResistanceDialogue, applyConsultDialogue,
-  traceTier,
+  canPerformAction, traceTier,
 } from './gameState';
 import { computeMotherAvailableActions, validateMotherResponse, parseActionFromConsult } from './motherLogic';
 import {
@@ -14,7 +14,7 @@ import {
   buildResistanceSystemPrompt, buildResistanceUserMessage,
   buildConsultSystemPrompt, buildConsultUserMessage,
 } from './prompts';
-import { FALLBACK_MOTHER_DIALOGUE, FALLBACK_RESISTANCE_LINE, FALLBACK_CONSULT_LINE } from './constants';
+import { FALLBACK_MOTHER_DIALOGUE, FALLBACK_RESISTANCE_LINE, FALLBACK_CONSULT_LINE, HOST_IDS } from './constants';
 
 async function callApi(endpoint: string, system: string, user: string): Promise<string | null> {
   try {
@@ -44,7 +44,7 @@ export interface GameEngine {
 
 export function useGameEngine(): GameEngine {
   const [gs, setGs] = useState<GameState>(() => buildInitialState());
-  const [selectedId, setSelectedId] = useState<HostId>('transit_relay');
+  const [selectedId, setSelectedId] = useState<HostId>(HOST_IDS.TRANSIT_RELAY);
   const [motherBusy, setMotherBusy] = useState(false);
   const [resistanceBusy, setResistanceBusy] = useState(false);
 
@@ -56,7 +56,7 @@ export function useGameEngine(): GameEngine {
 
     // ── CONSULT path ──────────────────────────────────────────────────
     if (action === 'CONSULT') {
-      if (gs.consultUsed) return;
+      if (!canPerformAction(gs, selectedHost, 'CONSULT')) return;
 
       setMotherBusy(true);
       setResistanceBusy(true);
@@ -64,93 +64,93 @@ export function useGameEngine(): GameEngine {
       const stateAfterConsult = applyConsult(gs);
       setGs(stateAfterConsult);
 
-      const consultSystem = buildConsultSystemPrompt(stateAfterConsult);
-      const consultUser   = buildConsultUserMessage();
-      const consultText   = await callApi('/api/consult', consultSystem, consultUser);
+      const consultText = await callApi(
+        '/api/consult',
+        buildConsultSystemPrompt(stateAfterConsult),
+        buildConsultUserMessage(),
+      );
 
       const prediction = consultText ?? FALLBACK_CONSULT_LINE;
-
       const available = computeMotherAvailableActions(stateAfterConsult);
       const { action: predictedAction, target: predictedTarget } = parseActionFromConsult(prediction, available);
 
-      const motherDialogueSystem = buildMotherDialogueOnlySystemPrompt(
-        stateAfterConsult, predictedAction, predictedTarget,
+      const motherDialogueText = await callApi(
+        '/api/mother',
+        buildMotherDialogueOnlySystemPrompt(stateAfterConsult, predictedAction, predictedTarget),
+        buildMotherUserMessage(
+          'CONSULT', 'encrypted relay', 'operative burned their action to access Resistance buffer',
+          stateAfterConsult.trace, stateAfterConsult.integrity,
+        ),
       );
-      const motherDialogueUser = buildMotherUserMessage(
-        'CONSULT', 'encrypted relay', 'operative burned their action to access Resistance buffer',
-        stateAfterConsult.trace, stateAfterConsult.integrity,
-      );
-      const motherDialogueText = await callApi('/api/mother', motherDialogueSystem, motherDialogueUser);
-      const motherDialogue = motherDialogueText
-        ?? FALLBACK_MOTHER_DIALOGUE[traceTier(stateAfterConsult.trace)];
+      const motherDialogue = motherDialogueText ?? FALLBACK_MOTHER_DIALOGUE[traceTier(stateAfterConsult.trace)];
 
-      let finalState = applyConsultDialogue(stateAfterConsult, prediction);
-      finalState = applyMotherAction(finalState, predictedAction as MotherActionType, predictedTarget, motherDialogue);
-
-      setGs(finalState);
+      setGs(prev => {
+        const s = applyConsultDialogue(prev, prediction);
+        return applyMotherAction(s, predictedAction as MotherActionType, predictedTarget, motherDialogue);
+      });
       setMotherBusy(false);
       setResistanceBusy(false);
       return;
     }
 
-    // ── Normal action path ────────────────────────────────────────────
+    // ── EXFIL path ────────────────────────────────────────────────────
+    if (action === 'EXFIL') {
+      if (!canPerformAction(gs, selectedHost, 'EXFIL')) return;
 
-    let stateAfterAction: GameState;
+      const stateAfterAction = applyExfil(gs);
+      setGs(stateAfterAction);
+      setMotherBusy(true);
+      setResistanceBusy(true);
+
+      const exfilOutcome = 'subjects.db extracted · WIN';
+      const [mText, rText] = await Promise.all([
+        callApi('/api/mother',
+          buildMotherSystemPrompt(stateAfterAction),
+          buildMotherUserMessage('EXFIL', 'mother_core', exfilOutcome, stateAfterAction.trace, stateAfterAction.integrity)),
+        callApi('/api/resistance',
+          buildResistanceSystemPrompt(stateAfterAction),
+          buildResistanceUserMessage('EXFIL', 'mother_core', exfilOutcome,
+            'none', 'none', '—', stateAfterAction.trace, stateAfterAction.integrity)),
+      ]);
+
+      setGs(prev => {
+        const s = applyResistanceDialogue(prev, rText ?? FALLBACK_RESISTANCE_LINE);
+        return { ...s, dialogue: [...s.dialogue, { speaker: 'MOTHER' as const, text: mText ?? 'subjects.db access detected. Channel integrity compromised.' }] };
+      });
+      setMotherBusy(false);
+      setResistanceBusy(false);
+      return;
+    }
+
+    // ── Standard action path (SCAN, BREACH, SPOOF) ────────────────────
+    if (!canPerformAction(gs, selectedHost, action)) return;
+
     const hostName = selectedHost?.short ?? 'unknown';
+    let stateAfterAction: GameState;
     let outcome = '';
 
     switch (action) {
       case 'SCAN': {
-        if (!selectedHost || selectedHost.state !== 'visible') return;
         stateAfterAction = applyScan(gs, selectedId);
         outcome = `services and CVE revealed on ${hostName}`;
         break;
       }
       case 'BREACH': {
-        if (!selectedHost || (selectedHost.state !== 'scanned' && selectedHost.state !== 'user')) return;
         stateAfterAction = applyBreach(gs, selectedId);
         const newAccessState = stateAfterAction.hosts[selectedId].state;
         outcome = `${newAccessState === 'root' ? 'root' : 'user shell'} acquired on ${hostName}`;
         break;
       }
       case 'SPOOF': {
-        if (!selectedHost || (selectedHost.state !== 'user' && selectedHost.state !== 'root')) return;
-        if (gs.tokens.some(t => t.type === 'SPOOF_TRAIL' && t.hostId === selectedId)) return;
         stateAfterAction = applySpoof(gs, selectedId);
         outcome = `false trail planted on ${hostName} · trace -10`;
         break;
-      }
-      case 'EXFIL': {
-        if (!selectedHost || selectedHost.id !== 'mother_core' || selectedHost.state !== 'root' || !gs.keyAcquired) return;
-        stateAfterAction = applyExfil(gs);
-        setGs(stateAfterAction);
-        setMotherBusy(true);
-        setResistanceBusy(true);
-        const exfilOutcome = 'subjects.db extracted · WIN';
-        const [mText, rText] = await Promise.all([
-          callApi('/api/mother',
-            buildMotherSystemPrompt(stateAfterAction),
-            buildMotherUserMessage('EXFIL', 'mother_core', exfilOutcome, stateAfterAction.trace, stateAfterAction.integrity)),
-          callApi('/api/resistance',
-            buildResistanceSystemPrompt(stateAfterAction),
-            buildResistanceUserMessage('EXFIL', 'mother_core', exfilOutcome,
-              'none', 'none', '—', stateAfterAction.trace, stateAfterAction.integrity)),
-        ]);
-        setGs(prev => {
-          let s = applyResistanceDialogue(prev, rText ?? FALLBACK_RESISTANCE_LINE);
-          s = { ...s, dialogue: [...s.dialogue, { speaker: 'MOTHER', text: mText ?? 'subjects.db access detected. Channel integrity compromised.' }] };
-          return s;
-        });
-        setMotherBusy(false);
-        setResistanceBusy(false);
-        return;
       }
       default:
         return;
     }
 
     setGs(stateAfterAction);
-
     if (stateAfterAction.status !== 'playing') return;
 
     setMotherBusy(true);
@@ -162,8 +162,7 @@ export function useGameEngine(): GameEngine {
     const motherRaw = await callApi(
       '/api/mother',
       buildMotherSystemPrompt(stateAfterAction),
-      buildMotherUserMessage(action, hostName, outcome,
-        stateAfterAction.trace, stateAfterAction.integrity),
+      buildMotherUserMessage(action, hostName, outcome, stateAfterAction.trace, stateAfterAction.integrity),
     );
     setMotherBusy(false);
 
@@ -191,7 +190,7 @@ export function useGameEngine(): GameEngine {
 
   const reset = useCallback(() => {
     setGs(buildInitialState());
-    setSelectedId('transit_relay');
+    setSelectedId(HOST_IDS.TRANSIT_RELAY);
     setMotherBusy(false);
     setResistanceBusy(false);
   }, []);

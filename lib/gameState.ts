@@ -1,10 +1,10 @@
 import type {
   GameState, Host, HostId, Token, TokenType,
   DispositionName, MotherActionType, MotherActionRecord,
-  EventEntry, DialogueLine, EventKind,
+  EventEntry, DialogueLine, EventKind, PlayerActionType,
 } from './types';
 import {
-  BASE_HOSTS, CONNECTIONS, DISPOSITIONS, KEY_HOST_CANDIDATES, CVE_BREACH_COST,
+  BASE_HOSTS, CONNECTIONS, DISPOSITIONS, KEY_HOST_CANDIDATES, CVE_BREACH_COST, HOST_IDS,
 } from './constants';
 
 // ── Run seeding ──────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ export function buildInitialState(): GameState {
   for (const [id, base] of Object.entries(BASE_HOSTS) as [HostId, typeof BASE_HOSTS[HostId]][]) {
     hosts[id] = {
       ...base,
-      state: (id === 'transit_relay' || id === 'custodian_dispatch') ? 'visible' : 'hidden',
+      state: (id === HOST_IDS.TRANSIT_RELAY || id === HOST_IDS.CUSTODIAN_DISPATCH) ? 'visible' : 'hidden',
       hasKey: id === keyHostId,
     };
   }
@@ -31,11 +31,11 @@ export function buildInitialState(): GameState {
   // Disposition starting tokens
   const tokens: Token[] = [];
   if (dispositionName === 'DIAGNOSTIC') {
-    tokens.push({ type: 'TRIPWIRE', hostId: 'transit_relay' });
-    tokens.push({ type: 'TRIPWIRE', hostId: 'custodian_dispatch' });
+    tokens.push({ type: 'TRIPWIRE', hostId: HOST_IDS.TRANSIT_RELAY });
+    tokens.push({ type: 'TRIPWIRE', hostId: HOST_IDS.CUSTODIAN_DISPATCH });
   } else if (dispositionName === 'PROTOCOL') {
-    tokens.push({ type: 'SHIELD', hostId: 'optimisation' });
-    tokens.push({ type: 'SHIELD', hostId: 'memory_vault' });
+    tokens.push({ type: 'SHIELD', hostId: HOST_IDS.OPTIMISATION });
+    tokens.push({ type: 'SHIELD', hostId: HOST_IDS.MEMORY_VAULT });
   }
 
   const startTrace = dispositionName === 'REMEDIATION' ? 20 : 0;
@@ -232,7 +232,7 @@ export function applySpoof(state: GameState, hostId: HostId): GameState {
 // ── Player action: EXFIL ─────────────────────────────────────────────
 
 export function applyExfil(state: GameState): GameState {
-  const core = state.hosts['mother_core'];
+  const core = state.hosts[HOST_IDS.MOTHER_CORE];
   if (!core || core.state !== 'root' || !state.keyAcquired) return state;
 
   const newTrace = clamp(state.trace + 30, 0, 100);
@@ -263,6 +263,36 @@ export function applyConsult(state: GameState): GameState {
 
   s = addEvent(s, 'info', `CONSULT invoked · deep buffer relay lit · trace +10 → ${s.trace}/100`);
   return checkWinLose(s);
+}
+
+// ── Action eligibility ───────────────────────────────────────────────
+
+export function canPerformAction(
+  gs: GameState,
+  host: Host | null,
+  action: PlayerActionType,
+): boolean {
+  switch (action) {
+    case 'SCAN':
+      return host !== null && host.state === 'visible';
+    case 'BREACH':
+      return host !== null && (host.state === 'scanned' || host.state === 'user');
+    case 'SPOOF':
+      return (
+        host !== null &&
+        (host.state === 'user' || host.state === 'root') &&
+        !gs.tokens.some(t => t.type === 'SPOOF_TRAIL' && t.hostId === host.id)
+      );
+    case 'EXFIL':
+      return (
+        host !== null &&
+        host.id === HOST_IDS.MOTHER_CORE &&
+        host.state === 'root' &&
+        gs.keyAcquired
+      );
+    case 'CONSULT':
+      return !gs.consultUsed;
+  }
 }
 
 // ── Mother action application ─────────────────────────────────────────
@@ -363,43 +393,4 @@ function checkWinLose(state: GameState): GameState {
     return { ...s, status: 'lost_cradle' };
   }
   return state;
-}
-
-// ── Board state serializer (for prompts) ─────────────────────────────
-
-export function serializeBoardState(state: GameState) {
-  const accessed = (Object.values(state.hosts) as Host[])
-    .filter(h => h.state === 'user' || h.state === 'root')
-    .map(h => `  ${h.numericId} ${h.short} (${h.state}${h.hasKey && h.state === 'root' ? ' · KEY HELD' : ''})`)
-    .join('\n') || '  [none]';
-
-  const tokenList = state.tokens.length > 0
-    ? state.tokens.map(t => `  ${t.type} on ${t.hostId}`).join('\n')
-    : '  [none]';
-
-  const connList = CONNECTIONS
-    .filter(c => !state.isolatedConnections.includes(c.id))
-    .map(c => `  [${c.id}] ${c.from} → ${c.to}`)
-    .join('\n');
-
-  const last3 = state.lastMotherActions.slice(-3)
-    .map(a => `${a.action}${a.target !== null ? ' on ' + a.target : ''}`)
-    .join(', ') || 'none';
-
-  const tier = traceTier(state.trace);
-  const tierLabel = traceTierLabel(state.trace);
-
-  return {
-    turn_number: state.turn,
-    trace: state.trace,
-    tier,
-    tier_label: tierLabel,
-    integrity: state.integrity,
-    disposition_name: state.disposition.name,
-    disposition_description: state.disposition.description,
-    accessed_hosts_list: accessed,
-    active_tokens_list: tokenList,
-    active_connections_list: connList,
-    last_3_actions: last3,
-  };
 }

@@ -1,5 +1,14 @@
 import type { Host, HostId, Connection, Disposition, DispositionName, CVEStrength } from './types';
 
+// ── Host ID constants ─────────────────────────────────────────────────
+export const HOST_IDS = {
+  TRANSIT_RELAY:      'transit_relay',
+  CUSTODIAN_DISPATCH: 'custodian_dispatch',
+  OPTIMISATION:       'optimisation',
+  MEMORY_VAULT:       'memory_vault',
+  MOTHER_CORE:        'mother_core',
+} as const satisfies Record<string, HostId>;
+
 // ── CVE trace costs ──────────────────────────────────────────────────
 export const CVE_BREACH_COST: Record<CVEStrength, number> = {
   soft: 10,

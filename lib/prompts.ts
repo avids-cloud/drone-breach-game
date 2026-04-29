@@ -1,6 +1,46 @@
 import type { GameState, Host } from './types';
-import { serializeBoardState } from './gameState';
+import { traceTier, traceTierLabel } from './gameState';
 import { computeMotherAvailableActions, formatAvailableActions } from './motherLogic';
+import { CONNECTIONS } from './constants';
+
+// ── Board state serializer ────────────────────────────────────────────
+
+function serializeBoardState(state: GameState) {
+  const accessed = (Object.values(state.hosts) as Host[])
+    .filter(h => h.state === 'user' || h.state === 'root')
+    .map(h => `  ${h.numericId} ${h.short} (${h.state}${h.hasKey && h.state === 'root' ? ' · KEY HELD' : ''})`)
+    .join('\n') || '  [none]';
+
+  const tokenList = state.tokens.length > 0
+    ? state.tokens.map(t => `  ${t.type} on ${t.hostId}`).join('\n')
+    : '  [none]';
+
+  const connList = CONNECTIONS
+    .filter(c => !state.isolatedConnections.includes(c.id))
+    .map(c => `  [${c.id}] ${c.from} → ${c.to}`)
+    .join('\n');
+
+  const last3 = state.lastMotherActions.slice(-3)
+    .map(a => `${a.action}${a.target !== null ? ' on ' + a.target : ''}`)
+    .join(', ') || 'none';
+
+  const tier = traceTier(state.trace);
+  const tierLabel = traceTierLabel(state.trace);
+
+  return {
+    turn_number: state.turn,
+    trace: state.trace,
+    tier,
+    tier_label: tierLabel,
+    integrity: state.integrity,
+    disposition_name: state.disposition.name,
+    disposition_description: state.disposition.description,
+    accessed_hosts_list: accessed,
+    active_tokens_list: tokenList,
+    active_connections_list: connList,
+    last_3_actions: last3,
+  };
+}
 
 // ── Section A: Mother system prompt ──────────────────────────────────
 

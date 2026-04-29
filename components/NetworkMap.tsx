@@ -1,5 +1,6 @@
 'use client';
 import type { Host, HostId, Token, Connection } from '@/lib/types';
+import { HOST_IDS } from '@/lib/constants';
 import HostNode from './HostNode';
 
 interface Props {
@@ -26,9 +27,9 @@ function ConnectionLine({
 }
 
 export default function NetworkMap({ hosts, selectedId, onSelect, tokens, isolatedConnections, connections }: Props) {
-  const dmz: HostId[]      = ['transit_relay', 'custodian_dispatch'];
-  const internal: HostId[] = ['optimisation', 'memory_vault'];
-  const core: HostId[]     = ['mother_core'];
+  const dmz: HostId[]      = [HOST_IDS.TRANSIT_RELAY, HOST_IDS.CUSTODIAN_DISPATCH];
+  const internal: HostId[] = [HOST_IDS.OPTIMISATION, HOST_IDS.MEMORY_VAULT];
+  const core: HostId[]     = [HOST_IDS.MOTHER_CORE];
 
   return (
     <div className="panel-default scanlines relative p-3 h-full flex flex-col">
@@ -54,7 +55,7 @@ export default function NetworkMap({ hosts, selectedId, onSelect, tokens, isolat
         </div>
 
         <div className="space-y-0.5 px-2">
-          {connections.filter(c => c.from === 'transit_relay' || c.from === 'custodian_dispatch').map(c => (
+          {connections.filter(c => c.from === HOST_IDS.TRANSIT_RELAY || c.from === HOST_IDS.CUSTODIAN_DISPATCH).map(c => (
             <ConnectionLine key={c.id} fromId={c.from} toId={c.to} isolated={isolatedConnections.includes(c.id)} />
           ))}
         </div>
@@ -70,7 +71,7 @@ export default function NetworkMap({ hosts, selectedId, onSelect, tokens, isolat
         </div>
 
         <div className="space-y-0.5 px-2">
-          {connections.filter(c => c.from === 'optimisation' || c.from === 'memory_vault').map(c => (
+          {connections.filter(c => c.from === HOST_IDS.OPTIMISATION || c.from === HOST_IDS.MEMORY_VAULT).map(c => (
             <ConnectionLine key={c.id} fromId={c.from} toId={c.to} isolated={isolatedConnections.includes(c.id)} />
           ))}
         </div>
