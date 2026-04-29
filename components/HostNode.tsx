@@ -85,7 +85,7 @@ export default function HostNode({ host, isSelected, onClick, tokens }: Props) {
 
       <TokenBadges tokens={tokens} hostId={host.id} />
 
-      {host.hasKey && host.state !== 'root' && (
+      {host.hasKey && (host.state === 'scanned' || host.state === 'user') && (
         <div className="glow-amber text-[9px] mt-1 blink">[ KEY HERE ]</div>
       )}
       {host.hasKey && host.state === 'root' && (

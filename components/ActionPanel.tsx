@@ -7,7 +7,7 @@ interface ActionDef {
   key: PlayerActionType;
   label: string;
   icon: React.ElementType;
-  traceCost: (host: Host | null) => string;
+  traceCost: (host: Host | null, gs: GameState) => string;
   desc: string;
   isValid: (host: Host | null, gs: GameState) => boolean;
   requires: string;
@@ -27,10 +27,11 @@ const ACTIONS: ActionDef[] = [
     key: 'BREACH',
     label: 'BREACH',
     icon: Zap,
-    traceCost: (h) => {
+    traceCost: (h, gs) => {
       if (!h || (h.state !== 'scanned' && h.state !== 'user')) return '+??';
       const base = CVE_BREACH_COST[h.cve.strength];
-      return `+${base}`;
+      const shielded = gs.tokens.some(t => t.type === 'SHIELD' && t.hostId === h.id);
+      return shielded ? `+${base + 15} ·SHD` : `+${base}`;
     },
     desc: 'Gain / deepen access. Always succeeds. Trace cost is the risk.',
     isValid: (h) => h !== null && (h.state === 'scanned' || h.state === 'user'),
@@ -92,7 +93,7 @@ export default function ActionPanel({ selectedHost, gameState, onAction, busy }:
         {ACTIONS.map(({ key, label, icon: Icon, traceCost, desc, isValid, requires }) => {
           const valid = isValid(selectedHost, gameState);
           const disabled = !valid || busy || !isPlaying;
-          const cost = traceCost(selectedHost);
+          const cost = traceCost(selectedHost, gameState);
           const isNegative = cost.startsWith('-');
 
           return (
