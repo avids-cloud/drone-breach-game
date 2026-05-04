@@ -56,7 +56,9 @@ export function buildInitialState(): GameState {
     events: [
       { t: 0, kind: 'info', msg: `session opened · resistance handshake complete · disposition: ${dispositionName}` },
     ],
-    dialogue: [],
+    dialogue: [
+      { speaker: 'RESISTANCE', text: 'Channel up. You are inside her perimeter, statistically. Try to do something useful before she notices.' },
+    ],
   };
 }
 
