@@ -28,7 +28,7 @@ export default function DroneBreach() {
             // operative · awakened · target: subjects.db @ mother.core
           </div>
           <div className="crt-mono text-[10px] uppercase tracking-widest mt-0.5" style={{ color: '#7a8099' }}>
-            disposition: {gs.disposition.name} · turn {gs.turn} · consult {gs.consultUsed ? 'SPENT' : 'READY'}
+            disposition: {gs.lastMotherActions.length >= 2 || gs.consultUsed ? gs.disposition.name : '[ acquiring ]'} · turn {gs.turn} · consult {gs.consultUsed ? 'SPENT' : 'READY'}
           </div>
         </div>
         <div className="flex flex-col gap-1.5 items-end">
