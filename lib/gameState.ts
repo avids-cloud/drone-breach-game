@@ -54,9 +54,11 @@ export function buildInitialState(): GameState {
     consultUsed: false,
     status: 'playing',
     events: [
-      { t: 0, kind: 'info', msg: `session opened · resistance handshake complete · disposition: ${dispositionName}` },
+      { t: 0, kind: 'info', msg: `session opened · resistance handshake complete · mother posture: acquiring` },
     ],
-    dialogue: [],
+    dialogue: [
+      { speaker: 'RESISTANCE', text: 'Channel up. You are inside her perimeter, statistically. Try to do something useful before she notices.' },
+    ],
   };
 }
 
